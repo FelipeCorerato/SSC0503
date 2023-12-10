@@ -1,82 +1,98 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
-# define IS_EQUAL 0
+#define OPERATION_SUCCEED 0
+#define OPERATION_FAILED (-1)
+#define NOT_FOUND (-1)
 
-void swap(int* xp, int* yp) {
-    int temp = *xp;
-    *xp = *yp;
-    *yp = temp;
-}
+int search(const int* table, int size, int item) {
+    int key = item % size;
 
-void bubbleSort(int array[], int size) {
-    int i = size - 1, lastSwappedIndex;
-    while (i >= 1) {
-        lastSwappedIndex = -1;
-
-        for (int j = 0; j < i; j++) {
-            printf("C %d %d\n", j, j + 1);
-            if (array[j] > array[j + 1]) {
-                printf("T %d %d\n", j, j + 1);
-                swap(&array[j], &array[j + 1]);
-                lastSwappedIndex = j;
-            }
+    for (int i = key; i < size; i++) {
+        if (table[i] == item) {
+            return i;
         }
 
-        i = lastSwappedIndex;
+        if (i == size - 1 && key != 0) {
+            i = -1;
+        }
 
-        if (lastSwappedIndex == -1)
+        if (i == key - 1) {
             break;
-    }
-}
-
-void selectionSort(int array[], int size) {
-    int minIndex;
-
-    for (int i = 0; i < size-1; i++) {
-        minIndex = i;
-        for (int j = i+1; j < size; j++) {
-            printf("C %d %d\n", minIndex, j);
-            if (array[j] < array[minIndex]) {
-                minIndex = j;
-            }
-        }
-
-        if(minIndex != i) {
-            printf("T %d %d\n", i, minIndex);
-            swap(&array[minIndex], &array[i]);
         }
     }
+
+    return NOT_FOUND;
 }
 
-void printArray(int array[], int size) {
-    for (int i = 0; i < size; i++) {
-        printf("%d ", array[i]);
+int insert(int* table, int size, int item) {
+    int isItemInArray = search(table, size, item) != NOT_FOUND;
+    if (isItemInArray) {
+        return OPERATION_FAILED;
     }
+
+    int key = item % size;
+    for (int i = key; i < size; i++) {
+        if (table[i] == -1) {
+            table[i] = item;
+            return OPERATION_SUCCEED;
+        }
+
+        if (i == size - 1 && key != 0) {
+            i = -1;
+        }
+
+        if (i == key - 1) {
+            break;
+        }
+    }
+
+    return OPERATION_FAILED;
+}
+
+int delete(int* table, int size, int item) {
+    int id = search(table, size, item);
+
+    if (id == -1) {
+        return NOT_FOUND;
+    }
+
+    table[id] = -1;
+    return OPERATION_SUCCEED;
 }
 
 int main() {
-    char sortMethod[100];
-    scanf("%s", &sortMethod);
+    int tableSize;
+    scanf("%d", &tableSize);
 
-    int numberOfElements;
-    scanf("%d", &numberOfElements);
+    int* table = malloc(tableSize * sizeof(int));
+    memset(table, -1, tableSize * sizeof(int));
 
-    int* array = malloc(numberOfElements * sizeof (int));
-    for (int i = 0; i < numberOfElements; i++) {
-        scanf("%d", &array[i]);
+    int numberOfInsertions, item;
+    scanf("%d", &numberOfInsertions);
+    for (int i = 0; i < numberOfInsertions; i++) {
+        scanf("%d", &item);
+
+        insert(table, tableSize, item);
     }
 
-    if (strcmp(sortMethod, "selecao") == IS_EQUAL) {
-        selectionSort(array, numberOfElements);
-    } else if (strcmp(sortMethod, "bolha") == IS_EQUAL) {
-        bubbleSort(array, numberOfElements);
-    } else {
-        return 1;
+    int numberOfDeletions;
+    scanf("%d", &numberOfDeletions);
+    for (int i = 0; i < numberOfDeletions; i++) {
+        scanf("%d", &item);
+
+        delete(table, tableSize, item);
     }
 
-    printArray(array, numberOfElements);
+    int numberOfSearches;
+    scanf("%d", &numberOfSearches);
+    for (int i = 0; i < numberOfSearches; i++) {
+        scanf("%d", &item);
+
+        int result = search(table, tableSize, item);
+        printf("%d ", result);
+    }
 
     return 0;
 }
